@@ -90,9 +90,12 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_Delay(1000);
+  HAL_Delay(500);		// delay after initializing I2C
   DS3231_Init(&hi2c1);
-
+  // update for correct RTC year
+  if(DS3231_GetYear() != 24) {
+	  DS3231_SetYear(24);
+  }
   lcd_init();
   lcd_clear_display();
   lcd_gotoxy(1, 1);
@@ -102,6 +105,8 @@ int main(void)
 
   menu_set_content();
   menu_update();
+
+  HAL_Delay(1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */

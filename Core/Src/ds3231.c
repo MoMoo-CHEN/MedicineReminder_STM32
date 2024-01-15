@@ -33,8 +33,8 @@ uint8_t DS3231_GetMonth(void) {
 
 uint16_t DS3231_GetYear(void) {
 	uint8_t decYear = DS3231_DecodeBCD(DS3231_GetRegByte(DS3231_REG_YEAR));
-	uint16_t century = (DS3231_GetRegByte(DS3231_REG_MONTH) >> DS3231_CENTURY) * 100 + 2000;
-	return century + decYear;
+//	uint16_t century = (DS3231_GetRegByte(DS3231_REG_MONTH) >> DS3231_CENTURY) * 100 + 2000;
+	return /*century +*/ decYear;
 }
 
 uint8_t DS3231_GetHour(void) {
@@ -63,9 +63,9 @@ void DS3231_SetMonth(uint8_t month) {
 }
 
 void DS3231_SetYear(uint16_t year) {
-	uint8_t century = (year / 100) % 20;
-	uint8_t monthReg = (DS3231_GetRegByte(DS3231_REG_MONTH) & 0x7f) | (century << DS3231_CENTURY);
-	DS3231_SetRegByte(DS3231_REG_MONTH, monthReg);
+//	uint8_t century = (year / 100) % 20;
+//	uint8_t monthReg = (DS3231_GetRegByte(DS3231_REG_MONTH) & 0x7f) | (century << DS3231_CENTURY);
+//	DS3231_SetRegByte(DS3231_REG_MONTH, monthReg);
 	DS3231_SetRegByte(DS3231_REG_YEAR, DS3231_EncodeBCD(year % 100));
 }
 
