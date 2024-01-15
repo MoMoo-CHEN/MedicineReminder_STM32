@@ -34,14 +34,15 @@ void load_schedule() {
 void store_schedule() {
 	int i;
 //	uint32_t buff[12];
-	buff[0] = schedule_size;
+	buff[0] = 0x11223344;
+	buff[1] = schedule_size;
 	for(i = 0; i < schedule_size; i++) {
-		buff[i + 1] = ((uint32_t) schedule_list[i].hour << 24);
-		buff[i + 1] |= ((uint32_t) schedule_list[i].minute << 16);
-		buff[i + 1] |= ((uint32_t) schedule_list[i].type_a) << 8;
-		buff[i + 1] |= schedule_list[i].type_b;
+		buff[i + 2] = ((uint32_t) schedule_list[i].hour << 24);
+		buff[i + 2] |= ((uint32_t) schedule_list[i].minute << 16);
+		buff[i + 2] |= ((uint32_t) schedule_list[i].type_a) << 8;
+		buff[i + 2] |= schedule_list[i].type_b;
 	}
-	Flash_Write_Data(ADDR_FLASH_SECTOR_5 + 4, buff, schedule_size + 1);
+	Flash_Write_Data(ADDR_FLASH_SECTOR_5, buff, schedule_size + 2);
 }
 
 void schedule_remove(int pos) {
