@@ -1,7 +1,8 @@
 #include "schedule.h"
 
 SCHEDULE schedule_list[10] = {};
-uint8_t schedule_size = 4, schedule_pos = 0, upcoming_schedule_pos;;
+uint8_t schedule_size = 4, schedule_pos = 0, upcoming_schedule_pos;
+int upcoming_time = 0;
 SCHEDULE tmp_schedule;
 extern RTC_Time c_time;
 uint32_t buff[12];
@@ -62,7 +63,7 @@ int convert_to_minute(uint8_t hour, uint8_t min) {
 
 void find_upcoming_schedule() {
 	int i;
-	int upcoming_time = 999999;
+	upcoming_time = 999999;
 	upcoming_schedule_pos = -1;
 	for (i = 0; i < schedule_size; i++) {
 		int cur_sch = convert_to_minute(schedule_list[i].hour, schedule_list[i].minute);

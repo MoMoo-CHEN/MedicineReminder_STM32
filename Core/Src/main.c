@@ -43,8 +43,12 @@
 I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
+extern uint8_t cur_screen, need_update_menu;
+extern uint8_t content[10][21];
 extern RTC_Time c_time;
+extern int upcoming_time;
 int time_update_cnt = 0;
+int notify = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,6 +106,7 @@ int main(void)
   lcd_send_string("Initialize...");
 
   load_schedule();
+  upcoming_time = 0;
 
   menu_set_content();
   menu_update();
@@ -241,6 +246,28 @@ void time_update()
 		menu_set_content();
 	}
 
+	if(notify == 0) {
+		if(c_time.hours == upcoming_time / 60 && c_time.minutes == upcoming_time % 60) {
+			notify = 1;
+			if(cur_screen == MAIN_SCREEN) {
+				strcpy((char*) content[3], "TIME FOR MEDICINE   ");
+				need_update_menu = 1;
+			}
+		}
+	}
+	else {
+		if(c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
+			notify = 0;
+			if(cur_screen == MAIN_SCREEN) {
+				strcpy((char*) content[3], "                    ");
+				need_update_menu = 1;
+			}
+		}
+	}
+
+	if(convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1) {
+		find_upcoming_schedule();
+	}
 }
 /* USER CODE END 4 */
 

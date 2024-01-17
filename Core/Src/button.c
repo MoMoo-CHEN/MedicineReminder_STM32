@@ -3,7 +3,7 @@
 extern MENU_ITEM menu_items[];
 extern uint8_t cur_screen, cur_pos, cur_sel, cur_shift;
 extern SCHEDULE schedule_list[];
-extern uint8_t schedule_size, schedule_pos, upcoming_pos;
+extern uint8_t schedule_size, schedule_pos;
 extern SCHEDULE tmp_schedule;
 
 int btn_cnt[4] = {0};
@@ -28,7 +28,7 @@ void check_button_up() {
 						cur_shift = 0;
 				}
 			} else {
-				if (cur_screen == 2) {
+				if (cur_screen == SETSCHEDULE_SCREEN) {
 					if (cur_pos == 2) {
 						if (tmp_schedule.type_a < 10)
 							tmp_schedule.type_a++;
@@ -37,7 +37,7 @@ void check_button_up() {
 							tmp_schedule.type_b++;
 					}
 				}
-				else if(cur_screen == 6) {
+				else if(cur_screen == SETTIME_SCREEN) {
 					if(cur_pos == 1) {
 						if(tmp_schedule.hour < 23)
 							tmp_schedule.hour++;
@@ -71,7 +71,7 @@ void check_button_down() {
 						cur_shift = cur_pos - 3;
 				}
 			} else {
-				if (cur_screen == 2) {
+				if (cur_screen == SETSCHEDULE_SCREEN) {
 					if (cur_pos == 2) {
 						if (tmp_schedule.type_a > 0)
 							tmp_schedule.type_a--;
@@ -80,7 +80,7 @@ void check_button_down() {
 							tmp_schedule.type_b--;
 					}
 				}
-				else if(cur_screen == 6) {
+				else if(cur_screen == SETTIME_SCREEN) {
 					if(cur_pos == 1) {
 						if(tmp_schedule.hour > 0)
 							tmp_schedule.hour--;
@@ -107,35 +107,36 @@ void check_button_select() {
 	if (HAL_GPIO_ReadPin(BT_SL_GPIO_Port, BT_SL_Pin) == GPIO_PIN_RESET) {
 		btn_cnt[2]++;
 		if (btn_cnt[2] == 20) {
-			if (cur_screen == 0) {
-				cur_screen = 1;
+			if (cur_screen == MAIN_SCREEN) {
+				cur_screen = MENU_SCREEN;
 				cur_pos = 1;
 				cur_sel = 0;
 				cur_shift = 0;
-			} else if (cur_screen == 1) {
+			} else if (cur_screen == MENU_SCREEN) {
 				if (cur_pos == 1) {
-					cur_screen = 2;
+					cur_screen = SETSCHEDULE_SCREEN;
 					cur_pos = 1;
 					cur_sel = 0;
 					cur_shift = 0;
 					tmp_schedule.hour = 0;
+					tmp_schedule.minute = 0;
 					tmp_schedule.type_a = 0;
 					tmp_schedule.type_b = 0;
 				} else if (cur_pos == 2) {
-					cur_screen = 3;
+					cur_screen = DISPLAYLIST_SCREEN;
 					cur_pos = 1;
 					cur_sel = 0;
 					cur_shift = 0;
 				} else if (cur_pos == 3) {
-					cur_screen = 5;
+					cur_screen = UPCOMING_SCREEN;
 					cur_pos = 0;
 					cur_sel = 0;
 					cur_shift = 0;
 					find_upcoming_schedule();
 				}
-			} else if (cur_screen == 2) {
+			} else if (cur_screen == SETSCHEDULE_SCREEN) {
 				if(cur_pos == 1) {
-					cur_screen = 6;
+					cur_screen = SETTIME_SCREEN;
 					cur_pos = 1;
 					cur_sel = 0;
 					cur_shift = 0;
@@ -151,7 +152,7 @@ void check_button_select() {
 					schedule_size++;
 					store_schedule();
 					HAL_Delay(100);
-					cur_screen = 1;
+					cur_screen = MENU_SCREEN;
 					cur_pos = 1;
 					cur_sel = 0;
 					cur_shift = 0;
@@ -160,28 +161,28 @@ void check_button_select() {
 					tmp_schedule.type_a = 0;
 					tmp_schedule.type_b = 0;
 				}
-			} else if (cur_screen == 3) {
+			} else if (cur_screen == DISPLAYLIST_SCREEN) {
 				schedule_pos = cur_pos;
-				cur_screen = 4;
+				cur_screen = VIEWSCHEDULE_SCREEN;
 				cur_pos = 1;
 				cur_sel = 0;
 				cur_shift = 0;
-			} else if (cur_screen == 4) {
+			} else if (cur_screen == VIEWSCHEDULE_SCREEN) {
 				if (cur_pos == 4) {
 					schedule_remove(schedule_pos - 1);
 					store_schedule();
 					HAL_Delay(100);
-					cur_screen = 3;
+					cur_screen = DISPLAYLIST_SCREEN;
 					cur_pos = schedule_pos - 1;
 					cur_sel = 0;
 					cur_shift = 0;
 				}
-			} else if (cur_screen == 6) {
+			} else if (cur_screen == SETTIME_SCREEN) {
 				if(cur_pos < 3 && cur_sel == 0) {
 					cur_sel = 1;
 				}
 				else {
-					cur_screen = 2;
+					cur_screen = SETSCHEDULE_SCREEN;
 					cur_pos = 1;
 					cur_sel = 0;
 					cur_shift = 0;
@@ -201,30 +202,30 @@ void check_button_back() {
 		if (btn_cnt[3] == 20) {
 			if (cur_sel == 1) {
 				cur_sel = 0;
-			} else if (cur_screen == 2) {
-				cur_screen = 1;
+			} else if (cur_screen == SETSCHEDULE_SCREEN) {
+				cur_screen = MENU_SCREEN;
 				cur_pos = 1;
 				cur_sel = 0;
 				cur_shift = 0;
-			} else if (cur_screen == 3) {
-				cur_screen = 1;
+			} else if (cur_screen == DISPLAYLIST_SCREEN) {
+				cur_screen = MENU_SCREEN;
 				cur_pos = 2;
 				cur_sel = 0;
 				cur_shift = 0;
-			} else if (cur_screen == 4) {
-				cur_screen = 3;
+			} else if (cur_screen == VIEWSCHEDULE_SCREEN) {
+				cur_screen = DISPLAYLIST_SCREEN;
 				cur_shift = 0;
 				cur_pos = schedule_pos;
 				if (cur_pos > 3)
 					cur_shift = cur_pos - 3;
 				cur_sel = 0;
-			} else if (cur_screen == 5) {
-				cur_screen = 1;
+			} else if (cur_screen == UPCOMING_SCREEN) {
+				cur_screen = MENU_SCREEN;
 				cur_pos = 3;
 				cur_sel = 0;
 				cur_shift = 0;
 			} else {
-				cur_screen = 0;
+				cur_screen = MAIN_SCREEN;
 				cur_pos = 0;
 				cur_sel = 0;
 				cur_shift = 0;

@@ -31,7 +31,7 @@ void menu_update() {
 void menu_set_content() {
 	int i;
 	switch (cur_screen) {
-	case 0:
+	case MAIN_SCREEN:
 		strcpy((char*) content[0], "MAIN SCREEN         ");
 		sprintf((char*) content[1], "   %02d:%02d:%02d         ", c_time.hours,
 				c_time.minutes, c_time.seconds);
@@ -39,20 +39,20 @@ void menu_set_content() {
 				c_time.month, 2000 + c_time.year);
 		strcpy((char*) content[3], "                    ");
 		break;
-	case 1:
+	case MENU_SCREEN:
 		strcpy((char*) content[0], "MENU                ");
 		strcpy((char*) content[1], " SET TIME           ");
 		strcpy((char*) content[2], " DISPLAY LIST       ");
 		strcpy((char*) content[3], " UPCOMING LIST      ");
 		break;
-	case 2:
+	case SETSCHEDULE_SCREEN:
 		strcpy((char*) content[0], "SET TIME            ");
 		sprintf((char*) content[1], " TIME: %02dH %02dM      ", tmp_schedule.hour, tmp_schedule.minute);
 		sprintf((char*) content[2], " TYPE A: %2d         ", tmp_schedule.type_a);
 		sprintf((char*) content[3], " TYPE B: %2d         ", tmp_schedule.type_b);
 		strcpy((char*) content[4], " SAVE               ");
 		break;
-	case 3:
+	case DISPLAYLIST_SCREEN:
 		strcpy((char*) content[0], "DISPLAY LIST        ");
 		for (i = 0; i < schedule_size; i++) {
 			sprintf((char*) content[i + 1], " TIME %d: %02dH %02dM    ", i + 1,
@@ -64,7 +64,7 @@ void menu_set_content() {
 				strcpy((char*) content[i + 1], "                    ");
 		}
 		break;
-	case 4:
+	case VIEWSCHEDULE_SCREEN:
 		sprintf((char*) content[0], "TIME %2d             ", schedule_pos);
 		sprintf((char*) content[1], " TIME: %02dH %02dM      ",
 				schedule_list[schedule_pos - 1].hour, schedule_list[schedule_pos - 1].minute);
@@ -74,7 +74,7 @@ void menu_set_content() {
 				schedule_list[schedule_pos - 1].type_b);
 		strcpy((char*) content[4], " DELETE             ");
 		break;
-	case 5:
+	case UPCOMING_SCREEN:
 		strcpy((char*) content[0], "UPCOMING LIST       ");
 		sprintf((char*) content[1], " CURRENT: %02d:%02d:%02d  ", c_time.hours,
 				c_time.minutes, c_time.seconds);
@@ -82,7 +82,7 @@ void menu_set_content() {
 		sprintf((char*) content[3], "   %02dH %02dM          ",
 				schedule_list[upcoming_schedule_pos].hour, schedule_list[upcoming_schedule_pos].minute);
 		break;
-	case 6:
+	case SETTIME_SCREEN:
 		strcpy((char*) content[0], "SET TIME            ");
 		sprintf((char*) content[1], " HOUR: %02d           ", tmp_schedule.hour);
 		sprintf((char*) content[2], " MINUTE: %02d         ", tmp_schedule.minute);
