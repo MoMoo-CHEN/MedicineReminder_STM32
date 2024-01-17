@@ -56,13 +56,31 @@ void schedule_remove(int pos) {
 	schedule_size--;
 }
 
+int convert_to_minute(uint8_t hour, uint8_t min) {
+	return hour * 60 + min;
+}
+
 void find_upcoming_schedule() {
 	int i;
-//	uint16_t max_
-	for (i = 0; i < schedule_pos; i++) {
-		if (schedule_list[i].hour * 60 + schedule_list[i].minute  > c_time.hours * 60 + c_time.minutes) {
+	int upcoming_time = 999999;
+	upcoming_schedule_pos = -1;
+	for (i = 0; i < schedule_size; i++) {
+		int cur_sch = convert_to_minute(schedule_list[i].hour, schedule_list[i].minute);
+		if (cur_sch > convert_to_minute(c_time.hour, c_time.minute) && cur_sch < upcoming_time) {
+			upcoming_time = cur_sch;
 			upcoming_schedule_pos = i;
 			break;
+		}
+	}
+	// upcoming schedule is in the next day?
+	if(upcoming_schedule_pos == -1) {
+		upcoming_time = 999999;
+		for(i = 0; i < schedule_size; i++) {
+			int cur_sch = convert_to_minute(schedule_list[i].hour, schedule_list[i].minute);
+			if(cur_sch < upcoming_time) {
+				upcoming_time = cur_sch;
+				upcoming_schedule_pos = i;
+			}
 		}
 	}
 }

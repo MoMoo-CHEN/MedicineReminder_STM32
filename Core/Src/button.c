@@ -155,6 +155,10 @@ void check_button_select() {
 					cur_pos = 1;
 					cur_sel = 0;
 					cur_shift = 0;
+					tmp_schedule.hour = 0;
+					tmp_schedule.minute = 0;
+					tmp_schedule.type_a = 0;
+					tmp_schedule.type_b = 0;
 				}
 			} else if (cur_screen == 3) {
 				schedule_pos = cur_pos;
