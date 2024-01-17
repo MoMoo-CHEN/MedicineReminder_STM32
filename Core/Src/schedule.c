@@ -66,7 +66,7 @@ void find_upcoming_schedule() {
 	upcoming_schedule_pos = -1;
 	for (i = 0; i < schedule_size; i++) {
 		int cur_sch = convert_to_minute(schedule_list[i].hour, schedule_list[i].minute);
-		if (cur_sch > convert_to_minute(c_time.hour, c_time.minute) && cur_sch < upcoming_time) {
+		if (cur_sch > convert_to_minute(c_time.hours, c_time.minutes) && cur_sch < upcoming_time) {
 			upcoming_time = cur_sch;
 			upcoming_schedule_pos = i;
 			break;
