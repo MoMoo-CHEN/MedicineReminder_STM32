@@ -43,12 +43,14 @@
 I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
-extern uint8_t cur_screen, need_update_menu;
+extern uint8_t cur_screen, need_update_menu, upcoming_schedule_pos;
+extern SCHEDULE schedule_list[10];
 extern uint8_t content[10][21];
 extern RTC_Time c_time;
 extern int upcoming_time;
 int time_update_cnt = 0;
-int notify = 0;
+int medicine_notify = 0;
+int type_a_cnt = 0, type_b_cnt = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -57,6 +59,7 @@ static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 void time_update();
+void stepper_control();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -94,39 +97,41 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_Delay(500);		// delay after initializing I2C
-  DS3231_Init(&hi2c1);
-  // update for correct RTC year
-  if(DS3231_GetYear() != 24) {
-	  DS3231_SetYear(24);
-  }
-  lcd_init();
-  lcd_clear_display();
-  lcd_gotoxy(1, 1);
-  lcd_send_string("Initialize...");
 
-  load_schedule();
-  upcoming_time = 0;
+  	HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
+  	HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
+	HAL_Delay(500);		// delay after initializing I2C
+	DS3231_Init(&hi2c1);
+	// update for correct RTC year
+	if (DS3231_GetYear() != 24) {
+		DS3231_SetYear(24);
+	}
+	lcd_init();
+	lcd_clear_display();
+	lcd_gotoxy(1, 1);
+	lcd_send_string("Initialize...");
 
-  menu_set_content();
-  menu_update();
+	load_schedule();
+	upcoming_time = 0;
 
-  HAL_Delay(1000);
+	menu_set_content();
+	menu_update();
+
+	HAL_Delay(1000);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  check_button();
-	  menu_update();
-	  time_update();
-
-	  HAL_Delay(10);
+	while (1) {
+		check_button();
+		menu_update();
+		time_update();
+		stepper_control();
+		HAL_Delay(1);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-  }
+	}
   /* USER CODE END 3 */
 }
 
@@ -222,9 +227,19 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, TYPEB_Pin|TYPEA_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : TYPEB_Pin TYPEA_Pin */
+  GPIO_InitStruct.Pin = TYPEB_Pin|TYPEA_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : BT_BK_Pin BT_SL_Pin BT_DN_Pin BT_UP_Pin */
   GPIO_InitStruct.Pin = BT_BK_Pin|BT_SL_Pin|BT_DN_Pin|BT_UP_Pin;
@@ -237,36 +252,47 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void time_update()
-{
+void time_update() {
 	time_update_cnt++;
-	if(time_update_cnt == 100) {
+	if (time_update_cnt == 1000) {
 		time_update_cnt = 0;
 		DS3231_GetFullDateTime(&c_time);
+		if (medicine_notify == 0) {
+			if (c_time.hours == upcoming_time / 60 && c_time.minutes == upcoming_time % 60) {
+				medicine_notify = 1;
+				type_a_cnt = schedule_list[upcoming_schedule_pos].type_a * 400;
+				type_b_cnt = schedule_list[upcoming_schedule_pos].type_b * 400;
+			}
+		} else {
+			if (c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
+				medicine_notify = 0;
+			}
+		}
+
+		if (convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1) {
+			find_upcoming_schedule();
+		}
+
 		menu_set_content();
 	}
+}
 
-	if(notify == 0) {
-		if(c_time.hours == upcoming_time / 60 && c_time.minutes == upcoming_time % 60) {
-			notify = 1;
-			if(cur_screen == MAIN_SCREEN) {
-				strcpy((char*) content[3], "TIME FOR MEDICINE   ");
-				need_update_menu = 1;
-			}
+void stepper_control() {
+	// type a
+	if(type_a_cnt > 0) {
+		HAL_GPIO_TogglePin(TYPEA_GPIO_Port, TYPEA_Pin);
+		type_a_cnt--;
+		if(type_a_cnt == 0) {
+			HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
 		}
 	}
-	else {
-		if(c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
-			notify = 0;
-			if(cur_screen == MAIN_SCREEN) {
-				strcpy((char*) content[3], "                    ");
-				need_update_menu = 1;
-			}
+	// type b
+	if(type_b_cnt > 0) {
+		HAL_GPIO_TogglePin(TYPEB_GPIO_Port, TYPEB_Pin);
+		type_b_cnt--;
+		if(type_b_cnt == 0) {
+			HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
 		}
-	}
-
-	if(convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1) {
-		find_upcoming_schedule();
 	}
 }
 /* USER CODE END 4 */
