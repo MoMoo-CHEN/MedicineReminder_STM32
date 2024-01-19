@@ -43,7 +43,9 @@
 I2C_HandleTypeDef hi2c1;
 
 /* USER CODE BEGIN PV */
-extern uint8_t cur_screen, need_update_menu, upcoming_schedule_pos;
+extern uint8_t cur_screen, need_update_menu;
+extern uint8_t is_next_day;
+extern int upcoming_schedule_pos;
 extern SCHEDULE schedule_list[10];
 extern uint8_t content[10][21];
 extern RTC_Time c_time;
@@ -266,10 +268,12 @@ void time_update() {
 		} else {
 			if (c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
 				medicine_notify = 0;
+				schedule_remove(upcoming_schedule_pos);
+				store_schedule();
 			}
 		}
 
-		if (convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1) {
+		if (convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1 && is_next_day == 0) {
 			find_upcoming_schedule();
 		}
 

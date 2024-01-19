@@ -1,7 +1,9 @@
 #include "schedule.h"
 
 SCHEDULE schedule_list[10] = {};
-uint8_t schedule_size = 4, schedule_pos = 0, upcoming_schedule_pos;
+uint8_t schedule_size = 4, schedule_pos = 0;
+uint8_t is_next_day = 0;
+int upcoming_schedule_pos;
 int upcoming_time = 0;
 SCHEDULE tmp_schedule;
 extern RTC_Time c_time;
@@ -65,12 +67,12 @@ void find_upcoming_schedule() {
 	int i;
 	upcoming_time = 999999;
 	upcoming_schedule_pos = -1;
+	is_next_day = 0;
 	for (i = 0; i < schedule_size; i++) {
 		int cur_sch = convert_to_minute(schedule_list[i].hour, schedule_list[i].minute);
 		if (cur_sch > convert_to_minute(c_time.hours, c_time.minutes) && cur_sch < upcoming_time) {
 			upcoming_time = cur_sch;
 			upcoming_schedule_pos = i;
-			break;
 		}
 	}
 	// upcoming schedule is in the next day?
@@ -81,6 +83,7 @@ void find_upcoming_schedule() {
 			if(cur_sch < upcoming_time) {
 				upcoming_time = cur_sch;
 				upcoming_schedule_pos = i;
+				is_next_day = 1;
 			}
 		}
 	}

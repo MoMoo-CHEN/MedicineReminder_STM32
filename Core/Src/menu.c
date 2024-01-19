@@ -5,7 +5,8 @@ uint8_t need_update_menu = 0;
 uint8_t content[10][21] = {0};
 
 extern SCHEDULE schedule_list[10];
-extern uint8_t schedule_size, schedule_pos, upcoming_schedule_pos;;
+extern uint8_t schedule_size, schedule_pos;
+extern int upcoming_schedule_pos;;
 extern SCHEDULE tmp_schedule;
 extern int medicine_notify, type_a_cnt, type_b_cnt;
 
@@ -83,8 +84,11 @@ void menu_set_content() {
 		sprintf((char*) content[1], " CURRENT: %02d:%02d:%02d  ", c_time.hours,
 				c_time.minutes, c_time.seconds);
 		strcpy((char*) content[2], " UPCOMING TIME:     ");
-		sprintf((char*) content[3], "   %02dH %02dM          ",
+		if(upcoming_schedule_pos != -1)
+			sprintf((char*) content[3], "   %02dH %02dM          ",
 				schedule_list[upcoming_schedule_pos].hour, schedule_list[upcoming_schedule_pos].minute);
+		else
+			strcpy((char*) content[3], "                    ");
 		break;
 	case SETTIME_SCREEN:
 		strcpy((char*) content[0], "SET TIME            ");
