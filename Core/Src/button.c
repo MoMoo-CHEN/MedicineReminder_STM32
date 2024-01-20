@@ -18,7 +18,7 @@ void check_button() {
 void check_button_up() {
 	if(HAL_GPIO_ReadPin(BT_UP_GPIO_Port, BT_UP_Pin) == GPIO_PIN_RESET) {
 		btn_cnt[0]++;
-		if (btn_cnt[0] == 200) {
+		if (btn_cnt[0] == 40) {
 			if (cur_sel == 0) {
 				if (cur_pos > 1) {
 					cur_pos -= menu_items[cur_screen].step;
@@ -63,7 +63,7 @@ void check_button_up() {
 void check_button_down() {
 	if (HAL_GPIO_ReadPin(BT_DN_GPIO_Port, BT_DN_Pin) == GPIO_PIN_RESET) {
 		btn_cnt[1]++;
-		if (btn_cnt[1] == 200) {
+		if (btn_cnt[1] == 40) {
 			if (cur_sel == 0) {
 				if (cur_pos < menu_items[cur_screen].n_child) {
 					cur_pos += menu_items[cur_screen].step;
@@ -106,7 +106,7 @@ void check_button_down() {
 void check_button_select() {
 	if (HAL_GPIO_ReadPin(BT_SL_GPIO_Port, BT_SL_Pin) == GPIO_PIN_RESET) {
 		btn_cnt[2]++;
-		if (btn_cnt[2] == 200) {
+		if (btn_cnt[2] == 40) {
 			if (cur_screen == MAIN_SCREEN) {
 				cur_screen = MENU_SCREEN;
 				cur_pos = 1;
@@ -199,7 +199,7 @@ void check_button_select() {
 void check_button_back() {
 	if (HAL_GPIO_ReadPin(BT_BK_GPIO_Port, BT_BK_Pin) == GPIO_PIN_RESET) {
 		btn_cnt[3]++;
-		if (btn_cnt[3] == 200) {
+		if (btn_cnt[3] == 40) {
 			if (cur_sel == 1) {
 				cur_sel = 0;
 			} else if (cur_screen == SETSCHEDULE_SCREEN) {

@@ -129,7 +129,7 @@ int main(void)
 		menu_update();
 		time_update();
 		stepper_control();
-		HAL_Delay(1);
+		HAL_Delay(5);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -256,7 +256,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void time_update() {
 	time_update_cnt++;
-	if (time_update_cnt == 1000) {
+	if (time_update_cnt == 200) {
 		time_update_cnt = 0;
 		DS3231_GetFullDateTime(&c_time);
 		if (medicine_notify == 0) {
