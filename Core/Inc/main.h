@@ -68,6 +68,12 @@ void Error_Handler(void);
 #define TYPEB_GPIO_Port GPIOB
 #define TYPEA_Pin GPIO_PIN_13
 #define TYPEA_GPIO_Port GPIOB
+#define TYPEA_CNT_INTR_Pin GPIO_PIN_14
+#define TYPEA_CNT_INTR_GPIO_Port GPIOB
+#define TYPEA_CNT_INTR_EXTI_IRQn EXTI15_10_IRQn
+#define TYPEB_CNT_INTR_Pin GPIO_PIN_15
+#define TYPEB_CNT_INTR_GPIO_Port GPIOB
+#define TYPEB_CNT_INTR_EXTI_IRQn EXTI15_10_IRQn
 #define BT_BK_Pin GPIO_PIN_9
 #define BT_BK_GPIO_Port GPIOD
 #define BT_SL_Pin GPIO_PIN_10

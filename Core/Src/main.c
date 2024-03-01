@@ -62,6 +62,7 @@ static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
 void time_update();
 void stepper_control();
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -243,11 +244,21 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : TYPEA_CNT_INTR_Pin TYPEB_CNT_INTR_Pin */
+  GPIO_InitStruct.Pin = TYPEA_CNT_INTR_Pin|TYPEB_CNT_INTR_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /*Configure GPIO pins : BT_BK_Pin BT_SL_Pin BT_DN_Pin BT_UP_Pin */
   GPIO_InitStruct.Pin = BT_BK_Pin|BT_SL_Pin|BT_DN_Pin|BT_UP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */
 /* USER CODE END MX_GPIO_Init_2 */
@@ -262,8 +273,8 @@ void time_update() {
 		if (medicine_notify == 0) {
 			if (c_time.hours == upcoming_time / 60 && c_time.minutes == upcoming_time % 60) {
 				medicine_notify = 1;
-				type_a_cnt = schedule_list[upcoming_schedule_pos].type_a * 400;
-				type_b_cnt = schedule_list[upcoming_schedule_pos].type_b * 400;
+				type_a_cnt = schedule_list[upcoming_schedule_pos].type_a;
+				type_b_cnt = schedule_list[upcoming_schedule_pos].type_b;
 			}
 		} else {
 			if (c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
@@ -285,17 +296,29 @@ void stepper_control() {
 	// type a
 	if(type_a_cnt > 0) {
 		HAL_GPIO_TogglePin(TYPEA_GPIO_Port, TYPEA_Pin);
-		type_a_cnt--;
-		if(type_a_cnt == 0) {
-			HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
-		}
 	}
 	// type b
 	if(type_b_cnt > 0) {
 		HAL_GPIO_TogglePin(TYPEB_GPIO_Port, TYPEB_Pin);
-		type_b_cnt--;
-		if(type_b_cnt == 0) {
-			HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
+	}
+}
+
+// External interrupt callback
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	if(GPIO_Pin == GPIO_PIN_14) {	// CNT TYPE A
+		if(type_a_cnt > 0) {
+			type_a_cnt--;
+			if(type_a_cnt == 0) {
+				HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
+			}
+		}
+	}
+	else if(GPIO_Pin == GPIO_PIN_15) {	// CNT TYPE B
+		if(type_b_cnt > 0) {
+			type_b_cnt--;
+			if(type_b_cnt == 0) {
+				HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
+			}
 		}
 	}
 }
