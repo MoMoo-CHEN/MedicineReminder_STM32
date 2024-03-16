@@ -64,6 +64,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define BT_BK_Pin GPIO_PIN_2
+#define BT_BK_GPIO_Port GPIOA
 #define TYPEB_Pin GPIO_PIN_12
 #define TYPEB_GPIO_Port GPIOB
 #define TYPEA_Pin GPIO_PIN_13
@@ -74,8 +76,6 @@ void Error_Handler(void);
 #define TYPEB_CNT_INTR_Pin GPIO_PIN_15
 #define TYPEB_CNT_INTR_GPIO_Port GPIOB
 #define TYPEB_CNT_INTR_EXTI_IRQn EXTI15_10_IRQn
-#define BT_BK_Pin GPIO_PIN_9
-#define BT_BK_GPIO_Port GPIOD
 #define BT_SL_Pin GPIO_PIN_10
 #define BT_SL_GPIO_Port GPIOD
 #define BT_DN_Pin GPIO_PIN_11
