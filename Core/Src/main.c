@@ -53,6 +53,7 @@ extern int upcoming_time;
 int time_update_cnt = 0;
 int medicine_notify = 0;
 int type_a_cnt = 0, type_b_cnt = 0;
+unsigned long last_interrupt_cnt_a = 0, last_interrupt_cnt_b = 0;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -311,21 +312,25 @@ void stepper_control() {
 
 // External interrupt callback
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
+	unsigned long interrupt_time = HAL_GetTick();
+
 	if(GPIO_Pin == GPIO_PIN_14) {	// CNT TYPE A
-		if(type_a_cnt > 0) {
+		if((interrupt_time - last_interrupt_cnt_a > 200) && type_a_cnt > 0) {
 			type_a_cnt--;
 			if(type_a_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
 			}
 		}
+		last_interrupt_cnt_a = interrupt_time;
 	}
 	else if(GPIO_Pin == GPIO_PIN_15) {	// CNT TYPE B
-		if(type_b_cnt > 0) {
+		if((interrupt_time - last_interrupt_cnt_b > 200) && type_b_cnt > 0) {
 			type_b_cnt--;
 			if(type_b_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
 			}
 		}
+		last_interrupt_cnt_b = interrupt_time;
 	}
 }
 /* USER CODE END 4 */
