@@ -291,7 +291,9 @@ void time_update() {
 			}
 		}
 
-		if (convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1 && is_next_day == 0) {
+		if ((convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1 && is_next_day == 0)
+				|| (upcoming_time == 999999))
+		{
 			find_upcoming_schedule();
 		}
 
