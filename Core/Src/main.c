@@ -285,7 +285,7 @@ void time_update() {
 			}
 		} else {
 			if (c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
-				medicine_notify = 0;
+//				medicine_notify = 0;
 				schedule_remove(upcoming_schedule_pos);
 				store_schedule();
 			}
@@ -321,6 +321,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			type_a_cnt--;
 			if(type_a_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
+				if(type_b_cnt == 0)
+					medicine_notify = 0;
 			}
 		}
 		last_interrupt_cnt_a = interrupt_time;
@@ -330,6 +332,8 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			type_b_cnt--;
 			if(type_b_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
+				if(type_a_cnt == 0)
+					medicine_notify = 0;
 			}
 		}
 		last_interrupt_cnt_b = interrupt_time;

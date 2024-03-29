@@ -39,7 +39,7 @@ void menu_set_content() {
 				c_time.minutes, c_time.seconds);
 		sprintf((char*) content[2], "   %02d-%02d-%04d       ", c_time.day,
 				c_time.month, 2000 + c_time.year);
-		if(medicine_notify == 1 && type_a_cnt == 0 && type_b_cnt == 0)
+		if(medicine_notify == 1 /*&& type_a_cnt == 0 && type_b_cnt == 0*/)
 			strcpy((char*) content[3], "TIME FOR MEDICINE!!!");
 		else
 			strcpy((char*) content[3], "                    ");
