@@ -51,7 +51,7 @@ extern uint8_t content[10][21];
 extern RTC_Time c_time;
 extern int upcoming_time;
 int time_update_cnt = 0;
-int medicine_notify = 0;
+int medicine_notify = 0, medicine_notify_cnt = 0;
 int type_a_cnt = 0, type_b_cnt = 0;
 unsigned long last_interrupt_cnt_a = 0, last_interrupt_cnt_b = 0;
 /* USER CODE END PV */
@@ -277,6 +277,13 @@ void time_update() {
 	if (time_update_cnt == 1000 / TIME_UNIT) {
 		time_update_cnt = 0;
 		DS3231_GetFullDateTime(&c_time);
+
+		if(medicine_notify_cnt != 0) {
+			medicine_notify_cnt--;
+			if(medicine_notify_cnt == 0)
+				medicine_notify = 0;
+		}
+
 		if (medicine_notify == 0) {
 			if (c_time.hours == upcoming_time / 60 && c_time.minutes == upcoming_time % 60) {
 				medicine_notify = 1;
@@ -322,7 +329,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			if(type_a_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
 				if(type_b_cnt == 0)
-					medicine_notify = 0;
+					medicine_notify_cnt = 120;	// 2 minutes
 			}
 		}
 		last_interrupt_cnt_a = interrupt_time;
@@ -333,7 +340,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 			if(type_b_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
 				if(type_a_cnt == 0)
-					medicine_notify = 0;
+					medicine_notify_cnt = 120;	// 2 minutes
 			}
 		}
 		last_interrupt_cnt_b = interrupt_time;

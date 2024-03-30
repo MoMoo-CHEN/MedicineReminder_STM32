@@ -8,7 +8,7 @@ extern SCHEDULE schedule_list[10];
 extern uint8_t schedule_size, schedule_pos;
 extern int upcoming_schedule_pos;;
 extern SCHEDULE tmp_schedule;
-extern int medicine_notify, type_a_cnt, type_b_cnt;
+extern int medicine_notify, medicine_notify_cnt, type_a_cnt, type_b_cnt;
 
 MENU_ITEM menu_items[] = {{0, 0}, {3, 1}, {4, 1}, {3, 1}, {4, 3}, {3, 0}, {3, 1}};
 
@@ -39,7 +39,9 @@ void menu_set_content() {
 				c_time.minutes, c_time.seconds);
 		sprintf((char*) content[2], "   %02d-%02d-%04d       ", c_time.day,
 				c_time.month, 2000 + c_time.year);
-		if(medicine_notify == 1 /*&& type_a_cnt == 0 && type_b_cnt == 0*/)
+		if(medicine_notify == 1 && (type_a_cnt != 0 || type_b_cnt != 0))
+			strcpy((char*) content[3], "GETTING MEDICINE....");
+		else if(medicine_notify == 1 && type_a_cnt == 0 && type_b_cnt == 0)
 			strcpy((char*) content[3], "TIME FOR MEDICINE!!!");
 		else
 			strcpy((char*) content[3], "                    ");
