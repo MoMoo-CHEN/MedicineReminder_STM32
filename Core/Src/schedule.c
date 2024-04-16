@@ -36,7 +36,6 @@ void load_schedule() {
 
 void store_schedule() {
 	int i;
-//	uint32_t buff[12];
 	buff[0] = 0x11223344;
 	buff[1] = schedule_size;
 	for(i = 0; i < schedule_size; i++) {

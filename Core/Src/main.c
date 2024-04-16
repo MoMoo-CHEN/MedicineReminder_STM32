@@ -68,6 +68,7 @@ static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void time_update();
 void stepper_control();
+void process_command();
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 /* USER CODE END PFP */
@@ -318,7 +319,7 @@ void time_update() {
 	time_update_cnt++;
 	if (time_update_cnt == 1000 / TIME_UNIT) {
 		time_update_cnt = 0;
-		DS3231_GetFullDateTime(&c_time);
+		//DS3231_GetFullDateTime(&c_time);
 
 		if(medicine_notify_cnt != 0) {
 			medicine_notify_cnt--;
@@ -395,10 +396,53 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		command_buffer[command_buffer_cnt] = rx_data[0];
 		command_buffer_cnt++;
 
+		process_command();
+
 		HAL_UART_Receive_IT(&huart1, (uint8_t*) rx_data, 1);
 	}
 }
 
+void process_command() {
+	if(command_buffer_cnt >= 4
+			&& command_buffer[command_buffer_cnt - 2] == 0x84
+			&& command_buffer[command_buffer_cnt - 1] == 0xF1
+	) {
+		// find start position
+		int start_pos;
+		for(start_pos = 0; start_pos < command_buffer_cnt - 2; start_pos++) {
+			if(command_buffer[start_pos] == 0x84 && command_buffer[start_pos + 1] == 0xF0)
+				break;
+		}
+
+		// check command type
+		uint8_t* buff = command_buffer + start_pos;
+		if(buff[2] == 0x81) {	// set RTC time
+//			DS3231_SetFullTime(buff[3], buff[4], buff[5]);
+//			DS3231_SetDate(buff[6]);
+//			DS3231_SetMonth(buff[7]);
+//			DS3231_SetYear(buff[8]);
+			//
+			c_time.hours = buff[3];
+			c_time.minutes = buff[4];
+			c_time.seconds = buff[5];
+			c_time.day = buff[6];
+			c_time.month = buff[7];
+			c_time.year = buff[8];
+		}
+		else if(buff[2] == 0x82) {	// set schedule list
+			schedule_size = buff[3];
+			for(int i = 0; i < schedule_size; i++) {
+				schedule_list[i].hour = buff[3 * i + 4];
+				schedule_list[i].minute = buff[3 * i + 5];
+				schedule_list[i].type_a = buff[3 * i + 6] & 0x0F;
+				schedule_list[i].type_b = (buff[3 * i + 6] >> 4) & 0x0F;
+			}
+			store_schedule();
+		}
+
+		command_buffer_cnt = 0;
+	}
+}
 
 /* USER CODE END 4 */
 

@@ -11,6 +11,9 @@ typedef struct schedule_tm
    uint8_t type_b;
 } SCHEDULE;
 
+extern SCHEDULE schedule_list[10];
+extern uint8_t schedule_size, schedule_pos;
+
 void load_schedule();
 
 void store_schedule();
