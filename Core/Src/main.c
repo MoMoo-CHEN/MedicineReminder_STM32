@@ -32,6 +32,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 #define TIME_UNIT	5
+#define RTC_EMUL	0
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -319,7 +320,10 @@ void time_update() {
 	time_update_cnt++;
 	if (time_update_cnt == 1000 / TIME_UNIT) {
 		time_update_cnt = 0;
-		//DS3231_GetFullDateTime(&c_time);
+#if RTC_EMUL
+#else
+		DS3231_GetFullDateTime(&c_time);
+#endif
 
 		if(medicine_notify_cnt != 0) {
 			medicine_notify_cnt--;
@@ -397,7 +401,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 		command_buffer_cnt++;
 
 		process_command();
-
 		HAL_UART_Receive_IT(&huart1, (uint8_t*) rx_data, 1);
 	}
 }
@@ -417,17 +420,19 @@ void process_command() {
 		// check command type
 		uint8_t* buff = command_buffer + start_pos;
 		if(buff[2] == 0x81) {	// set RTC time
-//			DS3231_SetFullTime(buff[3], buff[4], buff[5]);
-//			DS3231_SetDate(buff[6]);
-//			DS3231_SetMonth(buff[7]);
-//			DS3231_SetYear(buff[8]);
-			//
+#if RTC_EMUL
 			c_time.hours = buff[3];
 			c_time.minutes = buff[4];
 			c_time.seconds = buff[5];
 			c_time.day = buff[6];
 			c_time.month = buff[7];
 			c_time.year = buff[8];
+#else
+			DS3231_SetFullTime(buff[3], buff[4], buff[5]);
+			DS3231_SetDate(buff[6]);
+			DS3231_SetMonth(buff[7]);
+			DS3231_SetYear(buff[8]);
+#endif
 		}
 		else if(buff[2] == 0x82) {	// set schedule list
 			schedule_size = buff[3];
