@@ -53,7 +53,9 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define TIME_UNIT	5
+#define RTC_EMUL	0
+#define BTN_EMUL	1
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

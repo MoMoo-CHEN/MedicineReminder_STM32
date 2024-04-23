@@ -3,6 +3,10 @@
 
 #include "main.h"
 
+#if BTN_EMUL
+uint8_t btn_emul[4] = {0, 0, 0, 0};
+#endif
+
 void check_button();
 void check_button_up();
 void check_button_down();

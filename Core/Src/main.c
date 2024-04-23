@@ -31,8 +31,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TIME_UNIT	5
-#define RTC_EMUL	0
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
