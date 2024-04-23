@@ -327,13 +327,16 @@ void time_update() {
 
 		if(medicine_notify_cnt != 0) {
 			medicine_notify_cnt--;
-			if(medicine_notify_cnt == 0)
+			if(medicine_notify_cnt == 0) {
 				medicine_notify = 0;
+				HAL_GPIO_WritePin(BUZZ_GPIO_Port, BUZZ_Pin, GPIO_PIN_RESET);	// turn off buzzer
+			}
 		}
 
 		if (medicine_notify == 0) {
 			if (c_time.hours == upcoming_time / 60 && c_time.minutes == upcoming_time % 60) {
 				medicine_notify = 1;
+				HAL_GPIO_WritePin(BUZZ_GPIO_Port, BUZZ_Pin, GPIO_PIN_SET);	// turn on buzzer
 				type_a_cnt = schedule_list[upcoming_schedule_pos].type_a;
 				type_b_cnt = schedule_list[upcoming_schedule_pos].type_b;
 			}
