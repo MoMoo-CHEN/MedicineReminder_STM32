@@ -344,6 +344,7 @@ void time_update() {
 //				medicine_notify = 0;
 				schedule_remove(upcoming_schedule_pos);
 				store_schedule();
+				update_to_esp();
 			}
 		}
 
@@ -445,6 +446,7 @@ void process_command() {
 				schedule_list[i].type_b = (buff[3 * i + 6] >> 4) & 0x0F;
 			}
 			store_schedule();
+			update_to_esp();
 		}
 
 		command_buffer_cnt = 0;

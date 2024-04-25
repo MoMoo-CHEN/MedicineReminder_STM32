@@ -53,9 +53,7 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-#define TIME_UNIT	5
-#define RTC_EMUL	0
-#define BTN_EMUL	1
+
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/
@@ -88,7 +86,9 @@ void Error_Handler(void);
 #define BT_UP_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
-
+#define TIME_UNIT	5
+#define RTC_EMUL	0
+#define BTN_EMUL	1
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

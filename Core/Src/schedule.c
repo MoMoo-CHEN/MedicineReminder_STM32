@@ -87,3 +87,19 @@ void find_upcoming_schedule() {
 		}
 	}
 }
+
+extern UART_HandleTypeDef huart1;
+void update_to_esp() {
+	uint8_t buff[50];
+	buff[0] = 0x85;
+	buff[1] = 0xF0;
+	buff[2] = schedule_size;
+	for(int i = 0; i < schedule_size; i++) {
+		buff[3 * i + 3] = schedule_list[i].hour;
+		buff[3 * i + 4] = schedule_list[i].minute;
+		buff[3 * i + 5] = (schedule_list[i].type_b << 4) | schedule_list[i].type_a;
+	}
+	buff[3 * schedule_size + 3] = 0x85;
+	buff[3 * schedule_size + 4] = 0xF1;
+	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 3 * schedule_size + 5, 1000);
+}

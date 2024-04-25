@@ -24,4 +24,6 @@ int convert_to_minute(uint8_t hour, uint8_t min);
 
 void find_upcoming_schedule();
 
+void update_to_esp();
+
 #endif
