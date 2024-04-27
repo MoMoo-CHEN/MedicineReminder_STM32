@@ -87,7 +87,7 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define TIME_UNIT	5
-#define RTC_EMUL	0
+#define RTC_EMUL	1
 #define BTN_EMUL	1
 /* USER CODE END Private defines */
 

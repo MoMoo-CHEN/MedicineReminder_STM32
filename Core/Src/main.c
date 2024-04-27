@@ -114,17 +114,19 @@ int main(void)
   	HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
 	HAL_Delay(500);		// delay after initializing I2C
 	DS3231_Init(&hi2c1);
+#if !RTC_EMUL
 	// update for correct RTC year
 	if (DS3231_GetYear() != 24) {
 		DS3231_SetYear(24);
 	}
+#endif
 	lcd_init();
 	lcd_clear_display();
 	lcd_gotoxy(1, 1);
 	lcd_send_string("Initialize...");
 
 	load_schedule();
-	upcoming_time = 0;
+	upcoming_time = 999999;
 
 	menu_set_content();
 	menu_update();
@@ -320,6 +322,18 @@ void time_update() {
 	if (time_update_cnt == 1000 / TIME_UNIT) {
 		time_update_cnt = 0;
 #if RTC_EMUL
+		c_time.seconds++;
+		if(c_time.seconds == 60) {
+			c_time.seconds = 0;
+			c_time.minutes++;
+			if(c_time.minutes == 60) {
+				c_time.minutes = 0;
+				c_time.hours++;
+				if(c_time.hours == 24) {
+					c_time.hours = 0;
+				}
+			}
+		}
 #else
 		DS3231_GetFullDateTime(&c_time);
 #endif
@@ -338,15 +352,20 @@ void time_update() {
 				HAL_GPIO_WritePin(BUZZ_GPIO_Port, BUZZ_Pin, GPIO_PIN_SET);	// turn on buzzer
 				type_a_cnt = schedule_list[upcoming_schedule_pos].type_a;
 				type_b_cnt = schedule_list[upcoming_schedule_pos].type_b;
-			}
-		} else {
-			if (c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
-//				medicine_notify = 0;
+				// remove the schedule from the list
 				schedule_remove(upcoming_schedule_pos);
+				upcoming_time = 999999;
+				upcoming_schedule_pos = -1;
 				store_schedule();
 				update_to_esp();
 			}
 		}
+//		else {
+//			if (c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
+////				medicine_notify = 0;
+//
+//			}
+//		}
 
 		if ((convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1 && is_next_day == 0)
 				|| (upcoming_time == 999999))
@@ -446,7 +465,7 @@ void process_command() {
 				schedule_list[i].type_b = (buff[3 * i + 6] >> 4) & 0x0F;
 			}
 			store_schedule();
-			update_to_esp();
+//			update_to_esp();	// don't need to update to ESP
 		}
 
 		command_buffer_cnt = 0;

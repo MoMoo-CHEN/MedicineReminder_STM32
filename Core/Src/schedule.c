@@ -49,6 +49,10 @@ void store_schedule() {
 
 void schedule_remove(int pos) {
 	int i;
+
+	if(pos < 0)
+		return;
+
 	if (schedule_size == 0)
 		return;
 
@@ -93,13 +97,14 @@ void update_to_esp() {
 	uint8_t buff[50];
 	buff[0] = 0x85;
 	buff[1] = 0xF0;
-	buff[2] = schedule_size;
+	buff[2] = 0x82;
+	buff[3] = schedule_size;
 	for(int i = 0; i < schedule_size; i++) {
-		buff[3 * i + 3] = schedule_list[i].hour;
-		buff[3 * i + 4] = schedule_list[i].minute;
-		buff[3 * i + 5] = (schedule_list[i].type_b << 4) | schedule_list[i].type_a;
+		buff[3 * i + 4] = schedule_list[i].hour;
+		buff[3 * i + 5] = schedule_list[i].minute;
+		buff[3 * i + 6] = (schedule_list[i].type_b << 4) | schedule_list[i].type_a;
 	}
-	buff[3 * schedule_size + 3] = 0x85;
-	buff[3 * schedule_size + 4] = 0xF1;
-	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 3 * schedule_size + 5, 1000);
+	buff[3 * schedule_size + 4] = 0x85;
+	buff[3 * schedule_size + 5] = 0xF1;
+	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 3 * schedule_size + 6, 1000);
 }
