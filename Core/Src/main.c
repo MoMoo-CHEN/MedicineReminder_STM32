@@ -460,6 +460,10 @@ void process_command() {
 			store_schedule();
 //			update_to_esp();	// don't need to update to ESP
 		}
+		else if(buff[2] == 0x83 && buff[3] == 0x80) {	// WiFi connect successful
+			wifi_connect = 1;
+			menu_set_content();
+		}
 
 		command_buffer_cnt = 0;
 	}

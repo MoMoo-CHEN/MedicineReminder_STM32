@@ -19,6 +19,8 @@ enum {
 	SETTIME_SCREEN
 };
 
+extern uint8_t wifi_connect;
+
 void menu_update();
 void menu_set_content();
 

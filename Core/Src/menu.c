@@ -3,6 +3,7 @@
 uint8_t cur_screen = 0, cur_pos = 0, cur_sel = 0, cur_shift = 0;
 uint8_t need_update_menu = 0;
 uint8_t content[10][21] = {0};
+uint8_t wifi_connect = 0;
 
 extern SCHEDULE schedule_list[10];
 extern uint8_t schedule_size, schedule_pos;
@@ -104,6 +105,10 @@ void menu_set_content() {
 			content[cur_pos][0] = '>';
 		else
 			content[cur_pos][0] = '*';
+	}
+
+	if(wifi_connect == 1) {
+		content[0][19] = 'O';
 	}
 
 	need_update_menu = 1;
