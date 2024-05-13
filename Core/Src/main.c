@@ -319,6 +319,7 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void time_update() {
 	time_update_cnt++;
+	HAL_GPIO_WritePin(BUZZ_GPIO_Port, BUZZ_Pin, medicine_notify ? GPIO_PIN_SET : GPIO_PIN_RESET);
 	if (time_update_cnt == 1000 / TIME_UNIT) {
 		time_update_cnt = 0;
 #if RTC_EMUL
@@ -342,14 +343,12 @@ void time_update() {
 			medicine_notify_cnt--;
 			if(medicine_notify_cnt == 0) {
 				medicine_notify = 0;
-				HAL_GPIO_WritePin(BUZZ_GPIO_Port, BUZZ_Pin, GPIO_PIN_RESET);	// turn off buzzer
 			}
 		}
 
 		if (medicine_notify == 0) {
 			if (c_time.hours == upcoming_time / 60 && c_time.minutes == upcoming_time % 60) {
 				medicine_notify = 1;
-				HAL_GPIO_WritePin(BUZZ_GPIO_Port, BUZZ_Pin, GPIO_PIN_SET);	// turn on buzzer
 				type_a_cnt = schedule_list[upcoming_schedule_pos].type_a;
 				type_b_cnt = schedule_list[upcoming_schedule_pos].type_b;
 				// remove the schedule from the list
@@ -360,12 +359,6 @@ void time_update() {
 				update_to_esp();
 			}
 		}
-//		else {
-//			if (c_time.hours != upcoming_time / 60 || c_time.minutes != upcoming_time % 60) {
-////				medicine_notify = 0;
-//
-//			}
-//		}
 
 		if ((convert_to_minute(c_time.hours, c_time.minutes) - upcoming_time >= 1 && is_next_day == 0)
 				|| (upcoming_time == 999999))

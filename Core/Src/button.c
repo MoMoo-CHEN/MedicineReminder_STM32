@@ -5,6 +5,7 @@ extern uint8_t cur_screen, cur_pos, cur_sel, cur_shift;
 extern SCHEDULE schedule_list[];
 extern uint8_t schedule_size, schedule_pos;
 extern SCHEDULE tmp_schedule;
+extern int medicine_notify, medicine_notify_cnt;
 
 int btn_cnt[4] = {0};
 
@@ -139,10 +140,16 @@ void check_button_select() {
 		btn_cnt[2]++;
 		if (btn_cnt[2] == 40) {
 			if (cur_screen == MAIN_SCREEN) {
-				cur_screen = MENU_SCREEN;
-				cur_pos = 1;
-				cur_sel = 0;
-				cur_shift = 0;
+				if(medicine_notify == 1) {
+					medicine_notify = 0;
+					medicine_notify_cnt = 0;
+				}
+				else {
+					cur_screen = MENU_SCREEN;
+					cur_pos = 1;
+					cur_sel = 0;
+					cur_shift = 0;
+				}
 			} else if (cur_screen == MENU_SCREEN) {
 				if (cur_pos == 1) {
 					cur_screen = SETSCHEDULE_SCREEN;
