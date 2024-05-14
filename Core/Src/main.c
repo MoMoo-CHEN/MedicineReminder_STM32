@@ -57,7 +57,7 @@ int medicine_notify = 0, medicine_notify_cnt = 0;
 int type_a_cnt = 0, type_b_cnt = 0;
 unsigned long last_interrupt_cnt_a = 0, last_interrupt_cnt_b = 0;
 uint8_t rx_data[2];
-uint8_t command_buffer[100], command_buffer_cnt;
+uint8_t command_buffer[COMMAND_BUFFER_SIZE], command_buffer_cnt;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -414,6 +414,8 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	if(huart->Instance == USART1) {
 		command_buffer[command_buffer_cnt] = rx_data[0];
 		command_buffer_cnt++;
+		if(command_buffer_cnt >= COMMAND_BUFFER_SIZE)
+			command_buffer_cnt = 0;
 
 		process_command();
 		HAL_UART_Receive_IT(&huart1, (uint8_t*) rx_data, 1);

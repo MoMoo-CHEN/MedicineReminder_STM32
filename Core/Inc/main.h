@@ -89,6 +89,8 @@ void Error_Handler(void);
 #define TIME_UNIT	5
 #define RTC_EMUL	0
 #define BTN_EMUL	0
+
+#define COMMAND_BUFFER_SIZE		100
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
