@@ -1,7 +1,7 @@
 #include "schedule.h"
 
 SCHEDULE schedule_list[10] = {};
-uint8_t schedule_size = 4, schedule_pos = 0;
+uint8_t schedule_size = 0, schedule_pos = 0;
 uint8_t is_next_day = 0;
 int upcoming_schedule_pos;
 int upcoming_time = 0;

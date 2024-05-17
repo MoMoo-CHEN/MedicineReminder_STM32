@@ -487,6 +487,7 @@ void process_command() {
 				schedule_list[i].type_b = (buff[3 * i + 6] >> 4) & 0x0F;
 			}
 			store_schedule();
+			find_upcoming_schedule();
 //			update_to_esp();	// don't need to update to ESP
 		}
 		else if(buff[2] == 0x83 && buff[3] == 0x80) {	// WiFi connect successful

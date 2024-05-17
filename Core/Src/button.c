@@ -195,6 +195,7 @@ void check_button_select() {
 					schedule_list[schedule_size].type_b = tmp_schedule.type_b;
 					schedule_size++;
 					store_schedule();
+					find_upcoming_schedule();
 					update_to_esp();
 					HAL_Delay(100);
 					cur_screen = MENU_SCREEN;
@@ -216,6 +217,7 @@ void check_button_select() {
 				if (cur_pos == 4) {
 					schedule_remove(schedule_pos - 1);
 					store_schedule();
+					find_upcoming_schedule();
 					update_to_esp();
 					HAL_Delay(100);
 					cur_screen = DISPLAYLIST_SCREEN;
