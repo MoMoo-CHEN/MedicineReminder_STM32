@@ -56,6 +56,7 @@ int time_update_cnt = 0;
 int medicine_notify = 0, medicine_notify_cnt = 0;
 int type_a_cnt = 0, type_b_cnt = 0;
 unsigned long last_interrupt_cnt_a = 0, last_interrupt_cnt_b = 0;
+int sensor_tmout = 0, sensor_tmout_cnt = 0, sensor_tmout_cnt2 = 0;
 uint8_t rx_data[2];
 uint8_t command_buffer[COMMAND_BUFFER_SIZE], command_buffer_cnt;
 /* USER CODE END PV */
@@ -320,7 +321,7 @@ static void MX_GPIO_Init(void)
 void time_update() {
 	time_update_cnt++;
 	HAL_GPIO_WritePin(BUZZ_GPIO_Port, BUZZ_Pin, medicine_notify ? GPIO_PIN_SET : GPIO_PIN_RESET);
-	if (time_update_cnt == 1000 / TIME_UNIT) {
+	if (time_update_cnt == 1000 / TIME_UNIT) {		// 1 second
 		time_update_cnt = 0;
 #if RTC_EMUL
 		c_time.seconds++;
@@ -338,6 +339,26 @@ void time_update() {
 #else
 		DS3231_GetFullDateTime(&c_time);
 #endif
+		if(sensor_tmout_cnt != 0) {
+			sensor_tmout_cnt--;
+			if(sensor_tmout_cnt == 0) {
+				sensor_tmout = 1;
+				sensor_tmout_cnt2 = SENSOR_TIMEOUT_DISP;
+				medicine_notify = 0;
+				medicine_notify_cnt = 0;
+				type_a_cnt = 0;
+				type_b_cnt = 0;
+				HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
+			}
+		}
+
+		if(sensor_tmout_cnt2 != 0) {
+			sensor_tmout_cnt2--;
+			if(sensor_tmout_cnt2 == 0) {
+				sensor_tmout = 0;
+			}
+		}
 
 		if(medicine_notify_cnt != 0) {
 			medicine_notify_cnt--;
@@ -351,6 +372,10 @@ void time_update() {
 				medicine_notify = 1;
 				type_a_cnt = schedule_list[upcoming_schedule_pos].type_a;
 				type_b_cnt = schedule_list[upcoming_schedule_pos].type_b;
+				// sensor time out
+				sensor_tmout = 0;
+				sensor_tmout_cnt = SENSOR_TIMEOUT;
+				sensor_tmout_cnt2 = 0;
 				// remove the schedule from the list
 				schedule_remove(upcoming_schedule_pos);
 				upcoming_time = 999999;
@@ -388,6 +413,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if(GPIO_Pin == GPIO_PIN_14) {	// CNT TYPE A
 		if((interrupt_time - last_interrupt_cnt_a > 200) && type_a_cnt > 0) {
 			type_a_cnt--;
+			sensor_tmout_cnt = 0;
 			if(type_a_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
 				if(type_b_cnt == 0)
@@ -399,6 +425,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	else if(GPIO_Pin == GPIO_PIN_15) {	// CNT TYPE B
 		if((interrupt_time - last_interrupt_cnt_b > 200) && type_b_cnt > 0) {
 			type_b_cnt--;
+			sensor_tmout_cnt = 0;
 			if(type_b_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
 				if(type_a_cnt == 0)

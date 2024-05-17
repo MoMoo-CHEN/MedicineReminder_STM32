@@ -91,6 +91,8 @@ void Error_Handler(void);
 #define BTN_EMUL	0
 
 #define COMMAND_BUFFER_SIZE		100
+#define SENSOR_TIMEOUT			10
+#define SENSOR_TIMEOUT_DISP		30
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
