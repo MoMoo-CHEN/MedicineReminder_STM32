@@ -6,7 +6,7 @@ extern SCHEDULE schedule_list[];
 extern uint8_t schedule_size, schedule_pos;
 extern SCHEDULE tmp_schedule;
 extern int medicine_notify, medicine_notify_cnt;
-extern int sensor_tmout, sensor_tmout_cnt, sensor_tmout_cnt2;
+extern int sensor_tmout_cnt, sensor_tmout_cnt2;
 
 int btn_cnt[4] = {0};
 
@@ -147,8 +147,7 @@ void check_button_select() {
 					sensor_tmout_cnt = 0;
 				}
 				else {
-					if(sensor_tmout == 1) {
-						sensor_tmout = 0;
+					if(sensor_tmout_cnt2 != 0) {
 						sensor_tmout_cnt2 = 0;
 					}
 					cur_screen = MENU_SCREEN;

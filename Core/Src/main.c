@@ -342,22 +342,20 @@ void time_update() {
 		if(sensor_tmout_cnt != 0) {
 			sensor_tmout_cnt--;
 			if(sensor_tmout_cnt == 0) {
-				sensor_tmout = 1;
-				sensor_tmout_cnt2 = SENSOR_TIMEOUT_DISP;
-				medicine_notify = 0;
-				medicine_notify_cnt = 0;
-				type_a_cnt = 0;
-				type_b_cnt = 0;
-				HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
+				if(sensor_tmout != 0) {
+					sensor_tmout_cnt2 = SENSOR_TIMEOUT_DISP;
+					medicine_notify = 0;
+					medicine_notify_cnt = 0;
+					type_a_cnt = 0;
+					type_b_cnt = 0;
+					HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
+					HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
+				}
 			}
 		}
 
 		if(sensor_tmout_cnt2 != 0) {
 			sensor_tmout_cnt2--;
-			if(sensor_tmout_cnt2 == 0) {
-				sensor_tmout = 0;
-			}
 		}
 
 		if(medicine_notify_cnt != 0) {
@@ -373,7 +371,7 @@ void time_update() {
 				type_a_cnt = schedule_list[upcoming_schedule_pos].type_a;
 				type_b_cnt = schedule_list[upcoming_schedule_pos].type_b;
 				// sensor time out
-				sensor_tmout = 0;
+				sensor_tmout = 0x03;	// bit0: type A, bit1: type B
 				sensor_tmout_cnt = SENSOR_TIMEOUT;
 				sensor_tmout_cnt2 = 0;
 				// remove the schedule from the list
@@ -413,7 +411,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	if(GPIO_Pin == GPIO_PIN_14) {	// CNT TYPE A
 		if((interrupt_time - last_interrupt_cnt_a > 200) && type_a_cnt > 0) {
 			type_a_cnt--;
-			sensor_tmout_cnt = 0;
+			sensor_tmout &= ~0x01;	// clear bit0 for type A
 			if(type_a_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
 				if(type_b_cnt == 0)
@@ -425,7 +423,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 	else if(GPIO_Pin == GPIO_PIN_15) {	// CNT TYPE B
 		if((interrupt_time - last_interrupt_cnt_b > 200) && type_b_cnt > 0) {
 			type_b_cnt--;
-			sensor_tmout_cnt = 0;
+			sensor_tmout &= ~0x02;	// clear bit1 for type B
 			if(type_b_cnt == 0) {
 				HAL_GPIO_WritePin(TYPEB_GPIO_Port, TYPEB_Pin, GPIO_PIN_RESET);
 				if(type_a_cnt == 0)
