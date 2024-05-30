@@ -374,12 +374,15 @@ void time_update() {
 				sensor_tmout = 0x03;	// bit0: type A, bit1: type B
 				sensor_tmout_cnt = SENSOR_TIMEOUT;
 				sensor_tmout_cnt2 = 0;
+				// update the upcoming to ESP
+				current_schedule = schedule_list[upcoming_schedule_pos];
+				update_upcoming_to_esp(current_schedule);
 				// remove the schedule from the list
 				schedule_remove(upcoming_schedule_pos);
 				upcoming_time = 999999;
 				upcoming_schedule_pos = -1;
 				store_schedule();
-				update_to_esp();
+				update_schedulelist_to_esp();
 			}
 		}
 

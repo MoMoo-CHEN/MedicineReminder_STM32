@@ -5,7 +5,7 @@ uint8_t schedule_size = 0, schedule_pos = 0;
 uint8_t is_next_day = 0;
 int upcoming_schedule_pos;
 int upcoming_time = 0;
-SCHEDULE tmp_schedule;
+SCHEDULE tmp_schedule, current_schedule;
 extern RTC_Time c_time;
 uint32_t buff[12];
 uint32_t signature;
@@ -93,7 +93,7 @@ void find_upcoming_schedule() {
 }
 
 extern UART_HandleTypeDef huart1;
-void update_to_esp() {
+void update_schedulelist_to_esp() {
 	uint8_t buff[50];
 	buff[0] = 0x85;
 	buff[1] = 0xF0;
@@ -107,4 +107,30 @@ void update_to_esp() {
 	buff[3 * schedule_size + 4] = 0x85;
 	buff[3 * schedule_size + 5] = 0xF1;
 	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 3 * schedule_size + 6, 1000);
+}
+
+void update_upcoming_to_esp(SCHEDULE schedule) {
+	uint8_t buff[50];
+	buff[0] = 0x85;
+	buff[1] = 0xF0;
+	buff[2] = 0x83;
+	buff[3] = schedule.hour;
+	buff[4] = schedule.minute;
+	buff[5] = (schedule.type_b << 4) | schedule.type_a;
+	buff[6] = 0x85;
+	buff[7] = 0xF1;
+	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 8, 1000);
+}
+
+void update_confirm_to_esp(SCHEDULE schedule) {
+	uint8_t buff[50];
+	buff[0] = 0x85;
+	buff[1] = 0xF0;
+	buff[2] = 0x84;
+	buff[3] = schedule.hour;
+	buff[4] = schedule.minute;
+	buff[5] = (schedule.type_b << 4) | schedule.type_a;
+	buff[6] = 0x85;
+	buff[7] = 0xF1;
+	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 8, 1000);
 }

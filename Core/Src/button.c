@@ -141,10 +141,11 @@ void check_button_select() {
 		btn_cnt[2]++;
 		if (btn_cnt[2] == 40) {
 			if (cur_screen == MAIN_SCREEN) {
-				if(medicine_notify == 1) {
+				if(medicine_notify == 1) {	// confirm the schedule
 					medicine_notify = 0;
 					medicine_notify_cnt = 0;
 					sensor_tmout_cnt = 0;
+					update_confirm_to_esp(current_schedule);
 				}
 				else {
 					if(sensor_tmout_cnt2 != 0) {
@@ -195,7 +196,7 @@ void check_button_select() {
 					schedule_size++;
 					store_schedule();
 					find_upcoming_schedule();
-					update_to_esp();
+					update_schedulelist_to_esp();
 					HAL_Delay(100);
 					cur_screen = MENU_SCREEN;
 					cur_pos = 1;
@@ -217,7 +218,7 @@ void check_button_select() {
 					schedule_remove(schedule_pos - 1);
 					store_schedule();
 					find_upcoming_schedule();
-					update_to_esp();
+					update_schedulelist_to_esp();
 					HAL_Delay(100);
 					cur_screen = DISPLAYLIST_SCREEN;
 					cur_pos = schedule_pos - 1;
