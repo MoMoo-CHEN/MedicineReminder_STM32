@@ -42,7 +42,7 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
 
-UART_HandleTypeDef huart1;
+UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 extern uint8_t cur_screen, need_update_menu;
@@ -57,6 +57,7 @@ int medicine_notify = 0, medicine_notify_cnt = 0;
 int type_a_cnt = 0, type_b_cnt = 0;
 unsigned long last_interrupt_cnt_a = 0, last_interrupt_cnt_b = 0;
 int sensor_tmout = 0, sensor_tmout_cnt = 0, sensor_tmout_cnt2 = 0;
+int upcoming_delay = 0;
 uint8_t rx_data[2];
 uint8_t command_buffer[COMMAND_BUFFER_SIZE], command_buffer_cnt;
 /* USER CODE END PV */
@@ -65,7 +66,7 @@ uint8_t command_buffer[COMMAND_BUFFER_SIZE], command_buffer_cnt;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
-static void MX_USART1_UART_Init(void);
+static void MX_USART2_UART_Init(void);
 /* USER CODE BEGIN PFP */
 void time_update();
 void stepper_control();
@@ -108,7 +109,7 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
-  MX_USART1_UART_Init();
+  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
 
   	HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
@@ -132,7 +133,7 @@ int main(void)
 	menu_set_content();
 	menu_update();
 
-	HAL_UART_Receive_IT(&huart1, (uint8_t*) rx_data, 1);
+	HAL_UART_Receive_IT(&huart2, (uint8_t*) rx_data, 1);
 
 	HAL_Delay(1000);
   /* USER CODE END 2 */
@@ -233,35 +234,35 @@ static void MX_I2C1_Init(void)
 }
 
 /**
-  * @brief USART1 Initialization Function
+  * @brief USART2 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_USART1_UART_Init(void)
+static void MX_USART2_UART_Init(void)
 {
 
-  /* USER CODE BEGIN USART1_Init 0 */
+  /* USER CODE BEGIN USART2_Init 0 */
 
-  /* USER CODE END USART1_Init 0 */
+  /* USER CODE END USART2_Init 0 */
 
-  /* USER CODE BEGIN USART1_Init 1 */
+  /* USER CODE BEGIN USART2_Init 1 */
 
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN USART1_Init 2 */
+  /* USER CODE BEGIN USART2_Init 2 */
 
-  /* USER CODE END USART1_Init 2 */
+  /* USER CODE END USART2_Init 2 */
 
 }
 
@@ -365,6 +366,13 @@ void time_update() {
 			}
 		}
 
+		if(upcoming_delay != 0) {
+			upcoming_delay--;
+			if(upcoming_delay == 0) {
+				update_upcoming_to_esp(current_schedule);
+			}
+		}
+
 		if (medicine_notify == 0) {
 			if (c_time.hours == upcoming_time / 60 && c_time.minutes == upcoming_time % 60) {
 				medicine_notify = 1;
@@ -376,7 +384,8 @@ void time_update() {
 				sensor_tmout_cnt2 = 0;
 				// update the upcoming to ESP
 				current_schedule = schedule_list[upcoming_schedule_pos];
-				update_upcoming_to_esp(current_schedule);
+				upcoming_delay = 3;
+//				update_upcoming_to_esp(current_schedule);
 				// remove the schedule from the list
 				schedule_remove(upcoming_schedule_pos);
 				upcoming_time = 999999;
@@ -439,14 +448,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 
 // UART interrupt callback
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
-	if(huart->Instance == USART1) {
+	if(huart->Instance == USART2) {
 		command_buffer[command_buffer_cnt] = rx_data[0];
 		command_buffer_cnt++;
 		if(command_buffer_cnt >= COMMAND_BUFFER_SIZE)
 			command_buffer_cnt = 0;
 
 		process_command();
-		HAL_UART_Receive_IT(&huart1, (uint8_t*) rx_data, 1);
+		HAL_UART_Receive_IT(&huart2, (uint8_t*) rx_data, 1);
 	}
 }
 

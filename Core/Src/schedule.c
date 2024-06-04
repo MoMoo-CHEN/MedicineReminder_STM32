@@ -92,7 +92,7 @@ void find_upcoming_schedule() {
 	}
 }
 
-extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
 void update_schedulelist_to_esp() {
 	uint8_t buff[50];
 	buff[0] = 0x85;
@@ -106,7 +106,7 @@ void update_schedulelist_to_esp() {
 	}
 	buff[3 * schedule_size + 4] = 0x85;
 	buff[3 * schedule_size + 5] = 0xF1;
-	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 3 * schedule_size + 6, 1000);
+	HAL_UART_Transmit(&huart2, (uint8_t *) buff, 3 * schedule_size + 6, 1000);
 }
 
 void update_upcoming_to_esp(SCHEDULE schedule) {
@@ -119,7 +119,7 @@ void update_upcoming_to_esp(SCHEDULE schedule) {
 	buff[5] = (schedule.type_b << 4) | schedule.type_a;
 	buff[6] = 0x85;
 	buff[7] = 0xF1;
-	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 8, 1000);
+	HAL_UART_Transmit(&huart2, (uint8_t *) buff, 8, 1000);
 }
 
 void update_confirm_to_esp(SCHEDULE schedule) {
@@ -132,5 +132,5 @@ void update_confirm_to_esp(SCHEDULE schedule) {
 	buff[5] = (schedule.type_b << 4) | schedule.type_a;
 	buff[6] = 0x85;
 	buff[7] = 0xF1;
-	HAL_UART_Transmit(&huart1, (uint8_t *) buff, 8, 1000);
+	HAL_UART_Transmit(&huart2, (uint8_t *) buff, 8, 1000);
 }
