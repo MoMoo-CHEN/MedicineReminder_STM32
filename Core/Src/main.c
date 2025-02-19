@@ -33,6 +33,7 @@
 /* USER CODE BEGIN PD */
 /* 用户私有定义，可在此添加所需的宏或常量 */
 #define TIME_UNIT 100
+#define SENSOR_TIMEOUT 1000      // 添加SENSOR_TIMEOUT定义，根据实际需要设置值
 #define SENSOR_TIMEOUT_DISP 1000  // 根据实际需要定义的值
 #define COMMAND_BUFFER_SIZE 256   // 修改1: 定义 COMMAND_BUFFER_SIZE 为256
 /* USER CODE END PD */
