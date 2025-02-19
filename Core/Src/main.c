@@ -15,33 +15,35 @@
   ******************************************************************************
   */
 /* USER CODE END Header */
-
-/* 包含头文件 ----------------------------------------------------------------*/
+/* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* 私有包含文件 --------------------------------------------------------------*/
+/* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "dfplayer.h"
 #include "bluetooth.h"
 /* USER CODE END Includes */
 
-/* 私有类型定义 --------------------------------------------------------------*/
+/* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 /* 无 */
 /* USER CODE END PTD */
 
-/* 私有定义 ------------------------------------------------------------------*/
+/* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 /* 用户私有定义，可在此添加所需的宏或常量 */
+#define TIME_UNIT 100
+#define COMMAND_BUFFER_SIZE 256   // 修改1: 定义 COMMAND_BUFFER_SIZE 为256
 /* USER CODE END PD */
 
-/* 私有宏 --------------------------------------------------------------------*/
+/* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 /* 用户私有宏定义 */
 /* USER CODE END PM */
 
-/* 私有变量 ------------------------------------------------------------------*/
+/* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c1;
+
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -62,10 +64,10 @@ unsigned long last_interrupt_cnt_a = 0, last_interrupt_cnt_b = 0;
 int sensor_tmout = 0, sensor_tmout_cnt = 0, sensor_tmout_cnt2 = 0;
 int upcoming_delay = 0;
 uint8_t rx_data[2];
-uint8_t command_buffer[COMMAND_BUFFER_SIZE], command_buffer_cnt;
+uint8_t command_buffer[COMMAND_BUFFER_SIZE], command_buffer_cnt = 0; // 修改2: 初始化 command_buffer_cnt 为 0
 /* USER CODE END PV */
 
-/* 私有函数原型 --------------------------------------------------------------*/
+/* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_I2C1_Init(void);
@@ -79,13 +81,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart);
 /* USER CODE END PFP */
 
-/* 用户代码区域 --------------------------------------------------------------*/
+/* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 /* 此处可以添加其他全局初始化代码 */
 /* USER CODE END 0 */
 
 /**
-  * @brief  应用程序入口函数.
+  * @brief  The application entry point.
   * @retval int
   */
 int main(void)
@@ -94,21 +96,23 @@ int main(void)
   /* 用户初始化代码 */
   /* USER CODE END 1 */
 
-  /* 初始化所有外设和Systick */
+  /* MCU Configuration--------------------------------------------------------*/
+
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
   /* USER CODE BEGIN Init */
   /* 用户初始化代码 */
   /* USER CODE END Init */
 
-  /* 配置系统时钟 */
+  /* Configure the system clock */
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
   /* 用户系统级初始化 */
   /* USER CODE END SysInit */
 
-  /* 初始化所有配置的外设 */
+  /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_USART2_UART_Init();
@@ -155,7 +159,7 @@ int main(void)
   
   /* USER CODE END 2 */
 
-  /* 无限循环 */
+  /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
@@ -170,14 +174,14 @@ int main(void)
       /* 延时，单位为TIME_UNIT */
       HAL_Delay(TIME_UNIT);
   }
-  /* USER CODE END WHILE */
-  
-  /* USER CODE BEGIN 3 */
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
 }
 
 /**
-  * @brief 系统时钟配置函数
+  * @brief System Clock Configuration
   * @retval None
   */
 void SystemClock_Config(void)
@@ -185,11 +189,14 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
-  /** 配置主内部电压调节器输出 */
+  /** Configure the main internal regulator output voltage
+  */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-  /** 初始化 RCC 振荡器 */
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -204,13 +211,15 @@ void SystemClock_Config(void)
     Error_Handler();
   }
 
-  /** 初始化 CPU、AHB 和 APB 总线时钟 */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK |
-                                RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
@@ -218,11 +227,13 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief I2C1 初始化函数
+  * @brief I2C1 Initialization Function
+  * @param None
   * @retval None
   */
 static void MX_I2C1_Init(void)
 {
+
   /* USER CODE BEGIN I2C1_Init 0 */
   /* 用户代码 I2C1 初始化前置代码 */
   /* USER CODE END I2C1_Init 0 */
@@ -246,14 +257,17 @@ static void MX_I2C1_Init(void)
   /* USER CODE BEGIN I2C1_Init 2 */
   /* 用户代码 I2C1 初始化后处理 */
   /* USER CODE END I2C1_Init 2 */
+
 }
 
 /**
-  * @brief USART2 初始化函数
+  * @brief USART2 Initialization Function
+  * @param None
   * @retval None
   */
 static void MX_USART2_UART_Init(void)
 {
+
   /* USER CODE BEGIN USART2_Init 0 */
   /* 用户代码 USART2 初始化前置 */
   /* USER CODE END USART2_Init 0 */
@@ -276,63 +290,63 @@ static void MX_USART2_UART_Init(void)
   /* USER CODE BEGIN USART2_Init 2 */
   /* 用户代码 USART2 初始化后处理 */
   /* USER CODE END USART2_Init 2 */
+
 }
 
 /**
-  * @brief GPIO 初始化函数
+  * @brief GPIO Initialization Function
+  * @param None
   * @retval None
   */
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-
-  /* USER CODE BEGIN MX_GPIO_Init_1 */
+/* USER CODE BEGIN MX_GPIO_Init_1 */
   /* 用户代码 GPIO 初始化前置 */
-  /* USER CODE END MX_GPIO_Init_1 */
+/* USER CODE END MX_GPIO_Init_1 */
 
-  /* 启用 GPIO 端口时钟 */
+  /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
-  /* 配置输出引脚初始电平 */
-  HAL_GPIO_WritePin(GPIOB, BUZZ_Pin | TYPEB_Pin | TYPEA_Pin, GPIO_PIN_RESET);
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, BUZZ_Pin|TYPEB_Pin|TYPEA_Pin, GPIO_PIN_RESET);
 
-  /* 配置 BT_BK 引脚为输入 */
+  /*Configure GPIO pin : BT_BK_Pin */
   GPIO_InitStruct.Pin = BT_BK_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(BT_BK_GPIO_Port, &GPIO_InitStruct);
 
-  /* 配置 BUZZ、TYPEB、TYPEA 引脚为推挽输出 */
-  GPIO_InitStruct.Pin = BUZZ_Pin | TYPEB_Pin | TYPEA_Pin;
+  /*Configure GPIO pins : BUZZ_Pin TYPEB_Pin TYPEA_Pin */
+  GPIO_InitStruct.Pin = BUZZ_Pin|TYPEB_Pin|TYPEA_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* 配置 TYPEA_CNT_INTR 和 TYPEB_CNT_INTR 为外部中断 */
-  GPIO_InitStruct.Pin = TYPEA_CNT_INTR_Pin | TYPEB_CNT_INTR_Pin;
+  /*Configure GPIO pins : TYPEA_CNT_INTR_Pin TYPEB_CNT_INTR_Pin */
+  GPIO_InitStruct.Pin = TYPEA_CNT_INTR_Pin|TYPEB_CNT_INTR_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /* 配置 BT_SL、BT_DN、BT_UP 引脚为上拉输入 */
-  GPIO_InitStruct.Pin = BT_SL_Pin | BT_DN_Pin | BT_UP_Pin;
+  /*Configure GPIO pins : BT_SL_Pin BT_DN_Pin BT_UP_Pin */
+  GPIO_InitStruct.Pin = BT_SL_Pin|BT_DN_Pin|BT_UP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /* 配置 EXTI 中断优先级并使能 */
+  /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
-  /* USER CODE BEGIN MX_GPIO_Init_2 */
+/* USER CODE BEGIN MX_GPIO_Init_2 */
   /* 用户代码 GPIO 初始化后处理 */
-  /* USER CODE END MX_GPIO_Init_2 */
+/* USER CODE END MX_GPIO_Init_2 */
 }
 
-/* 用户代码区域 4 */
 /* USER CODE BEGIN 4 */
 
 /**
@@ -372,6 +386,7 @@ void time_update(void)
                     sensor_tmout_cnt2 = SENSOR_TIMEOUT_DISP;
                     medicine_notify = 0;
                     medicine_notify_cnt = 0;
+                    /* 修改4: 确保 type_a_cnt 与 type_b_cnt 已在变量声明时初始化 */
                     type_a_cnt = 0;
                     type_b_cnt = 0;
                     HAL_GPIO_WritePin(TYPEA_GPIO_Port, TYPEA_Pin, GPIO_PIN_RESET);
@@ -381,7 +396,7 @@ void time_update(void)
         }
         if(sensor_tmout_cnt2 != 0)
         {
-            sensor_tmout_cnt2--;
+            sensor_tmout_cnt2--;  // 修改5: sensor_tmout_cnt2 已初始化，无需特殊处理
         }
         /* 处理提醒计数 */
         if(medicine_notify_cnt != 0)
@@ -423,7 +438,7 @@ void time_update(void)
                 store_schedule();
                 update_schedulelist_to_esp();
 
-                /* 调用 DFPlayer 播放语音文件，文件号为1（假设） */
+                /* 修改6: 调用 DFPlayer 播放语音文件函数，应确保该函数已正确定义 */
                 DFPlayer_Play(1);
             }
         }
@@ -581,14 +596,33 @@ void process_command(void)
 /* USER CODE END 4 */
 
 /**
-  * @brief  错误处理函数
+  * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
 void Error_Handler(void)
 {
-  /* 用户可在此添加错误处理代码 */
+  /* USER CODE BEGIN Error_Handler_Debug */
+  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
   {
   }
+  /* USER CODE END Error_Handler_Debug */
 }
+
+#ifdef  USE_FULL_ASSERT
+/**
+  * @brief  Reports the name of the source file and the source line number
+  *         where the assert_param error has occurred.
+  * @param  file: pointer to the source file name
+  * @param  line: assert_param error line source number
+  * @retval None
+  */
+void assert_failed(uint8_t *file, uint32_t line)
+{
+  /* USER CODE BEGIN 6 */
+  /* User can add his own implementation to report the file name and line number,
+     ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
+  /* USER CODE END 6 */
+}
+#endif /* USE_FULL_ASSERT */
