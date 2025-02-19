@@ -50,20 +50,20 @@ void Bluetooth_ProcessData(uint8_t *data, uint16_t length)
   * 此函数用于接收蓝牙模块通过 UART 发来的数据，
   * 并在检测到换行符时调用 Bluetooth_ProcessData 函数进行数据解析处理。
   */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if(huart->Instance == USART2)
-    {
-        /* 将接收到的一个字节存入缓冲区 */
-        bluetooth_rx_buffer[bluetooth_rx_index++] = bluetooth_rx_buffer[0];
-
-        /* 若检测到换行符或缓冲区已满，则处理数据 */
-        if (bluetooth_rx_index >= 100 || bluetooth_rx_buffer[bluetooth_rx_index - 1] == '\n')
-        {
-            Bluetooth_ProcessData(bluetooth_rx_buffer, bluetooth_rx_index);
-            bluetooth_rx_index = 0;
-        }
-        /* 继续接收下一个字节 */
-        HAL_UART_Receive_IT(&huart2, bluetooth_rx_buffer, 1);
-    }
-}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+//{
+//    if(huart->Instance == USART2)
+//    {
+//        /* 将接收到的一个字节存入缓冲区 */
+//        bluetooth_rx_buffer[bluetooth_rx_index++] = bluetooth_rx_buffer[0];
+//
+//        /* 若检测到换行符或缓冲区已满，则处理数据 */
+//        if (bluetooth_rx_index >= 100 || bluetooth_rx_buffer[bluetooth_rx_index - 1] == '\n')
+//        {
+//            Bluetooth_ProcessData(bluetooth_rx_buffer, bluetooth_rx_index);
+//            bluetooth_rx_index = 0;
+//        }
+//        /* 继续接收下一个字节 */
+//        HAL_UART_Receive_IT(&huart2, bluetooth_rx_buffer, 1);
+//    }
+//}
